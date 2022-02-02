@@ -21,8 +21,11 @@ jobs:
         include:
           - shardNumber: '1'
           - shardNumber: '2'
+    outputs:
+      shard1: ${{ steps.shard1.outputs }}
     steps:
       - name: Run Acceptance Tests
+        id: shard1
         run: |
           echo "::set-output name=ephemeralNamespace::$EPHEMERAL_NAMESPACE"
           echo "::set-output name=shardNumber::$SHARD_NUMBER"
@@ -30,3 +33,10 @@ jobs:
         env:
           SHARD_NUMBER: ${{ matrix.shardNumber }}
           TAG: "@sanity"
+  print_results:
+    name: Print Results
+    runs-on: ubuntu-latest
+    needs: sanity_tests
+    steps:
+      - run: |
+          echo ${{ needs.sanity_tests.outputs.shard1 }}
