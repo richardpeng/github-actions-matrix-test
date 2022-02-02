@@ -12,31 +12,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  sanity_tests:
-    name: Sanity Tests
+  build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - shardNumber: '1'
-          - shardNumber: '2'
+        app: [a, b, c]
+
     outputs:
-      shard1: ${{ steps.shard1.outputs }}
+      deploy-url-a: ${{ steps.deploy-url.outputs.a }}
+      deploy-url-b: ${{ steps.deploy-url.outputs.b }}
+      deploy-url-c: ${{ steps.deploy-url.outputs.c }}
+
     steps:
-      - name: Run Acceptance Tests
-        id: shard1
-        run: |
-          echo "::set-output name=ephemeralNamespace::$EPHEMERAL_NAMESPACE"
-          echo "::set-output name=shardNumber::$SHARD_NUMBER"
-          echo "::set-output name=tag::$TAG"
-        env:
-          SHARD_NUMBER: ${{ matrix.shardNumber }}
-          TAG: "@sanity"
-  print_results:
-    name: Print Results
+      - id: deploy
+        run: echo '::set-output name=details_url::http://${{ matrix.app }}'
+
+      - id: deploy-url
+        run: echo '::set-output name=${{ matrix.app }}::${{ steps.deploy.outputs.details_url }}'
+
+  e2e:
     runs-on: ubuntu-latest
-    needs: sanity_tests
+    needs:
+      - build
+
+    strategy:
+      matrix:
+        container: [A, B, C, D, E, F]
+
     steps:
-      - run: |
-          echo ${{ needs.sanity_tests.outputs.shard1 }}
+      - env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: echo "$NEEDS"
