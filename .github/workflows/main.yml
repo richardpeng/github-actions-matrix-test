@@ -24,9 +24,9 @@ jobs:
     steps:
       - name: Run Acceptance Tests
         run: |
-          echo "Ephemeral namespace: $EPHEMERAL_NAMESPACE"
-          echo "Shard number: $SHARD_NUMBER"
-          echo "Tag: $TAG"
+          echo "::set-output name=ephemeralNamespace::$EPHEMERAL_NAMESPACE"
+          echo "::set-output name=shardNumber::$SHARD_NUMBER"
+          echo "::set-output name=tag::$TAG"
         env:
           SHARD_NUMBER: ${{ matrix.shardNumber }}
           TAG: "@sanity"
